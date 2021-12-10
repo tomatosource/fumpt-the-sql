@@ -20,12 +20,12 @@ import (
 )
 
 func main() {
-	if err := doTheThing("/repo"); err != nil {
+	if err := walkDir("/repo"); err != nil {
 		panic(err)
 	}
 }
 
-func doTheThing(path string) error {
+func walkDir(path string) error {
 	if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if err == nil &&
 			!info.IsDir() &&
