@@ -43,6 +43,7 @@ func doTheThing(path string) error {
 		if err == nil &&
 			!info.IsDir() &&
 			!strings.HasPrefix(info.Name(), ".") &&
+			!strings.Contains(path, "vendor") &&
 			strings.HasSuffix(info.Name(), ".go") {
 			err = processFile(path, nil, os.Stdout)
 		}
