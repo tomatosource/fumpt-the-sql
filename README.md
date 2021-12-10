@@ -4,6 +4,13 @@ Opionated sql formatter.
 
 Uses https://sqlformat.darold.net/ as formatter.
 
+Docs here: https://github.com/darold/pgFormatter
+
+Arguments set:
+
+- `--comma-break`
+- `--tabs`
+
 ## Usage
 
 1. `make`
