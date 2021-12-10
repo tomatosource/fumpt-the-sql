@@ -23,19 +23,6 @@ func main() {
 	if err := doTheThing("/repo"); err != nil {
 		panic(err)
 	}
-	// filename := "/repo/dao.go"
-	// text := "\n// this is a comment\n"
-
-	// f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	// if err != nil {
-	// panic(err)
-	// }
-
-	// defer f.Close()
-
-	// if _, err = f.WriteString(text); err != nil {
-	// panic(err)
-	// }
 }
 
 func doTheThing(path string) error {
