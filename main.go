@@ -27,12 +27,14 @@ func main() {
 }
 
 func walkDir(path string) error {
-	if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(path, func(path string, f os.FileInfo, err error) error {
+		if f.IsDir() && (f.Name() == ".git" || f.Name() == "vendor") {
+			return filepath.SkipDir
+		}
 		if err == nil &&
-			!info.IsDir() &&
-			!strings.HasPrefix(info.Name(), ".") &&
-			!strings.Contains(path, "vendor") &&
-			strings.HasSuffix(info.Name(), ".go") {
+			!f.IsDir() &&
+			!strings.HasPrefix(f.Name(), ".") &&
+			strings.HasSuffix(f.Name(), ".go") {
 			err = processFile(path, nil, os.Stdout)
 		}
 		if err != nil {
