@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"go/ast"
@@ -113,8 +114,21 @@ func replaceAst(f *ast.File, fset *token.FileSet) {
 								log.Println(fmt.Sprintf("format failed at %s: %v", fset.Position(arg.Pos()), err))
 								return true
 							}
+
+							funPos := fset.Position(fun.Pos())
+							n, err := getLineIndentationLevel(funPos.Filename, funPos.Line)
+							if err != nil {
+								log.Println(fmt.Sprintf("getting indentation failed at %s: %v", fset.Position(arg.Pos()), err))
+								return true
+							}
+
+							parts := strings.Split(res, "\n")
+							for i, p := range parts {
+								parts[i] = strings.Repeat("\t", n+1) + p
+							}
+							res = strings.Join(parts, "\n")
 							// TODO more gooder
-							arg.Value = "`" + res + strings.Repeat(" ", 0) + "`"
+							arg.Value = "`\n" + res + "`"
 						}
 					}
 				}
@@ -163,7 +177,7 @@ func formatQuery(src string) (string, error) {
 		return "", errors.Wrap(err, "writing query to tmpfile")
 	}
 
-	cmd := exec.Command("pg_format", "--inplace", tmpFile.Name())
+	cmd := exec.Command("pg_format", "--inplace", "--comma-break", "--tabs", tmpFile.Name())
 	if err := cmd.Run(); err != nil {
 		return "", errors.Wrap(err, "running pg_format")
 	}
@@ -174,4 +188,31 @@ func formatQuery(src string) (string, error) {
 	}
 
 	return string(formattedQuery), nil
+}
+
+func getLineIndentationLevel(path string, lineNo int) (int, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	line, err := readLine(file, lineNo)
+	if err != nil {
+		return 0, errors.Wrap(err, "reading line")
+	}
+
+	return len(line) - len(strings.TrimLeft(line, " \t\n")), nil
+}
+
+func readLine(r io.Reader, lineNo int) (string, error) {
+	currLine := 1
+	sc := bufio.NewScanner(r)
+	for sc.Scan() {
+		if currLine == lineNo {
+			return sc.Text(), sc.Err()
+		}
+		currLine++
+	}
+	return "", io.EOF
 }
